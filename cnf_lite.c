@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#define NEWLIB_PORT_AWARE
+#include <io_common.h>
+
 #include "cnf_lite.h"
 
 // Function prototypes.

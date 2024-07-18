@@ -1,97 +1,70 @@
 
-ENTRY(_start);
+ENTRY(__start);
+
+MEMORY {
+	bios	: ORIGIN = 0x00000000, LENGTH = 528K /* 0x00000000 - 0x00084000: BIOS memory */
+	bram	: ORIGIN = 0x00084000, LENGTH = 496K /* 0x00084000 - 0x00100000: BIOS unused memory */
+	gram	: ORIGIN = 0x00100000, LENGTH =  31M /* 0x00100000 - 0x02000000: GAME memory */
+}
+
+REGION_ALIAS("MAIN_REGION", bram);
+
+PHDRS {
+  text PT_LOAD;
+}
 
 SECTIONS {
-	.text 0x00084000: {
-		_ftext = . ;
+	.text : {
 		*(.text)
-		*(.text.*)
-		*(.gnu.linkonce.t*)
-		KEEP(*(.init))
-		KEEP(*(.fini))
-		QUAD(0)
-	}
+	} >MAIN_REGION :text
 
-	PROVIDE(_etext = .);
-	PROVIDE(etext = .);
+	.reginfo : { *(.reginfo) } >MAIN_REGION
 
-	.reginfo : { *(.reginfo) }
-
-	/* Global/static constructors and deconstructors. */
 	.ctors ALIGN(16): {
 		KEEP(*crtbegin*.o(.ctors))
 		KEEP(*(EXCLUDE_FILE(*crtend*.o) .ctors))
 		KEEP(*(SORT(.ctors.*)))
 		KEEP(*(.ctors))
-	}
+	} >MAIN_REGION
+
 	.dtors ALIGN(16): {
 		KEEP(*crtbegin*.o(.dtors))
 		KEEP(*(EXCLUDE_FILE(*crtend*.o) .dtors))
 		KEEP(*(SORT(.dtors.*)))
 		KEEP(*(.dtors))
-	}
+	} >MAIN_REGION
 
-	/* Static data.  */
 	.rodata ALIGN(128): {
 		*(.rodata)
-		*(.rodata.*)
-		*(.gnu.linkonce.r*)
-	}
+	} >MAIN_REGION
 
 	.data ALIGN(128): {
 		_fdata = . ;
 		*(.data)
-		*(.data.*)
-		*(.gnu.linkonce.d*)
 		SORT(CONSTRUCTORS)
-	}
-
-	.rdata ALIGN(128): { *(.rdata) }
-	.gcc_except_table ALIGN(128): { *(.gcc_except_table) }
+	} >MAIN_REGION
 
 	_gp = ALIGN(128) + 0x7ff0;
-	.lit4 ALIGN(128): { *(.lit4) }
-	.lit8 ALIGN(128): { *(.lit8) }
+	.lit4 ALIGN(128): { *(.lit4) } >MAIN_REGION
+	.lit8 ALIGN(128): { *(.lit8) } >MAIN_REGION
 
 	.sdata ALIGN(128): {
 		*(.sdata)
-		*(.sdata.*)
-		*(.gnu.linkonce.s*)
-	}
+	} >MAIN_REGION
 
-	_edata = .;
-	PROVIDE(edata = .);
-
-	/* Uninitialized data.  */
 	.sbss ALIGN(128) : {
 		_fbss = . ;
 		*(.sbss)
-		*(.sbss.*)
-		*(.gnu.linkonce.sb*)
-		*(.scommon)
-	}
+	} >MAIN_REGION
 
 	.bss ALIGN(128) : {
 		*(.bss)
-		*(.bss.*)
-		*(.gnu.linkonce.b*)
-		*(COMMON)
-	}
-	_end_bss = .;
+	} >MAIN_REGION
 
 	/* Symbols needed by crt0.s.  */
-	PROVIDE(_heap_size = 0x2000);
-	PROVIDE(_stack_size = 0x2000);
+	PROVIDE(_end = .);
+	PROVIDE(_heap_size = -1);
 
-	_stack = ALIGN(128);
 	PROVIDE(_stack = .);
-	. = _stack + _stack_size;
-
-	_end = .;
-	PROVIDE(end = .);
-
-	/* Unwanted stuff */
-	/DISCARD/ : {
-		* ( .MIPS.abiflags )
-	}
+	PROVIDE(_stack_size = ORIGIN(MAIN_REGION) + LENGTH(MAIN_REGION) - _stack);
 }

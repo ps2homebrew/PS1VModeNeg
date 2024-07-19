@@ -7,14 +7,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ps2dev/ps2dev:v1.0
+    container: ghcr.io/ps2homebrew/ps2homebrew:main
     # instead of "ps2dev/ps2dev:latest" you can use different tags, for example for old projects you can use "ps2dev/ps2dev:v1.0"
     steps:
-    - name: Install dependencies
-      run: |
-        apk add build-base git zip
-
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Compile project
       run: |
@@ -44,7 +40,7 @@ jobs:
 
     - name: Create release
       if: github.ref == 'refs/heads/main'
-      uses: marvinpinto/action-automatic-releases@latest
+      uses: mathieucarbou/marvinpinto-action-automatic-releases@latest
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"

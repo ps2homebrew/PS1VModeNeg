@@ -1,27 +1,25 @@
-EE_BIN = PS1VModeNeg.elf
+EE_BIN = PS1VModeNegRaw.elf
+EE_BIN_PACKED = PS1VModeNeg.elf
 EE_OBJS = main.o cnf_lite.o
 
 EE_INCS := -I$(PS2SDK)/ee/include -I$(PS2SDK)/common/include -I.
 EE_GPVAL = -G0
 EE_CFLAGS = -D_EE -Os -mno-gpopt $(EE_GPVAL) -Wall $(EE_INCS)
-EE_LDFLAGS = -Tlinkfile -L$(PS2SDK)/ee/lib -s
-EE_LIBS += -lcdvd -ldebug -lc -lkernel-nopatch
+EE_LIBS += -ldebug
+EE_NEWLIB_NANO ?= 1
+EE_COMPACT_EXECUTABLE ?= 1
 
-%.o : %.c
-	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+EE_LINKFILE ?= linkfile
 
-%.o : %.S
-	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+all: $(EE_BIN_PACKED)
 
-%.o : %.s
-	$(EE_AS) $(EE_ASFLAGS) $< -o $@
-
-$(EE_BIN) : $(EE_OBJS)
-	$(EE_CC) $(EE_CFLAGS) $(EE_LDFLAGS) -o $(EE_BIN) $(EE_OBJS) $(EE_LIBS)
-
-all: $(EE_BIN)
+$(EE_BIN_PACKED): $(EE_BIN)
+	echo "Compressing..."
+	ps2-packer $< $@
+	rm -f $(EE_BIN)
 
 clean:
-	rm -f $(EE_OBJS) $(EE_BIN)
+	rm -f $(EE_OBJS) $(EE_BIN_PACKED)
 
 include $(PS2SDK)/Defs.make
+include $(PS2SDK)/samples/Makefile.eeglobal

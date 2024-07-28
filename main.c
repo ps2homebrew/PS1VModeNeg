@@ -1,3 +1,4 @@
+#include <kernel.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,12 +9,18 @@
 #include <osd_config.h>
 
 #include <kernel.h>
+
+#define NEWLIB_PORT_AWARE
 #include <fileio.h>
+
 #include <sifrpc.h>
 
 #include <loadfile.h>
 
 #include "cnf_lite.h"
+
+// Disable all the patched functions
+DISABLE_PATCHED_FUNCTIONS();
 
 /* Some macros used for patching. */
 #define JAL(addr)      (0x0c000000 | (0x3ffffff & ((addr) >> 2)))
@@ -78,18 +85,18 @@ static int InitVideoModeParams(void)
         temp          = (temp & 0xFFFFFC00) | 3;
         temp          = (temp & 0xFFF003FF) | 0x1800;
         temp          = (temp & 0xC00FFFFF) | 0x01200000;
-        temp          = (temp & 0xFFFFFC00FFFFFFFF) | (0xC000L << 19);
-        temp          = (temp & 0xFFE003FFFFFFFFFF) | (0xF300L << 35);
-        temp          = (temp & 0x801FFFFFFFFFFFFF) | (0xC000L << 40);
+        temp          = (temp & 0xFFFFFC00FFFFFFFF) | (0xC000LL << 19);
+        temp          = (temp & 0xFFE003FFFFFFFFFF) | (0xF300LL << 35);
+        temp          = (temp & 0x801FFFFFFFFFFFFF) | (0xC000LL << 40);
         *emu_SYNCHV_I = temp;
 
         // Nearly a repeat of the block above.
         temp           = (temp & 0xFFFFFC00) | 4;
         temp           = (temp & 0xFFF003FF) | 0x1800;
         temp           = (temp & 0xC00FFFFF) | 0x01200000;
-        temp           = (temp & 0xFFFFFC00FFFFFFFF) | (0xC000L << 19);
-        temp           = (temp & 0xFFE003FFFFFFFFFF) | (0xF300L << 35);
-        temp           = (temp & 0x801FFFFFFFFFFFFF) | (0xC000L << 40);
+        temp           = (temp & 0xFFFFFC00FFFFFFFF) | (0xC000LL << 19);
+        temp           = (temp & 0xFFE003FFFFFFFFFF) | (0xF300LL << 35);
+        temp           = (temp & 0x801FFFFFFFFFFFFF) | (0xC000LL << 40);
         *emu_SYNCHV_NI = temp;
     }
 
